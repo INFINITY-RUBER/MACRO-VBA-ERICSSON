@@ -14,6 +14,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
+
 '********************************Desarrollado por  RUBER HERNANDEZ*********************************************
 Dim TanqCombustible, procesados, Motor, BatArranque, Generador, Transferencia, Power, BcoBaterias, UPS As Integer
 Dim Inversor, TabElectrico, Medicion, Protecciones, AcomPpal, RedComercial, Fusible, IntBaja, IntMedia, Pararrayo As Integer

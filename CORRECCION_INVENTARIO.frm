@@ -17,7 +17,10 @@ Attribute VB_Exposed = False
 
 
 Dim lastRow, VALOR1, VALOR2 As Double
-Dim BUSCARLETRAS, L1, L2, L3, L4, L5, TEXTO_CELDA, MODIFICA As String
+Dim BUSCARLETRAS, L1, L2, L3, L4, L5, L6, TEXTO_CELDA, MODIFICA As String
+Dim vector As Variant
+Dim fecha As Boolean
+
 
 
 
@@ -43,35 +46,12 @@ Sub BUCLE() '-------------------------------BUCLE1----MAYOR MENTE PARA PINTAR CE
      If ActiveCell.Value = L2 Then ActiveCell = TEXTO_CELDA
      If ActiveCell.Value = L3 Then ActiveCell = TEXTO_CELDA
      If ActiveCell.Value = L4 Then ActiveCell = TEXTO_CELDA
-   
-  End If
+   End If
     
    ActiveCell.Offset(1, 0).Select
  Next i
 End Sub
-Sub BUCLE1() '-------------------------------BUCLE1----MAYOR MENTE PARA CORREGIR VALORES-------------
-  
-   
-  For i = 5 To lastRow
-   
- If IsNumeric(ActiveCell.Value) Then
-   If (ActiveCell.Value) < VALOR1 Then ActiveCell = VALOR1
-   If (ActiveCell.Value) >= VALOR2 Then ActiveCell = VALOR2
-  End If
- 
-  If MODIFICA = "SI" Then
-     If IsError(ActiveCell) Then ActiveCell = ""
-     If ActiveCell.Value = L1 Then ActiveCell = TEXTO_CELDA
-     If ActiveCell.Value = L2 Then ActiveCell = TEXTO_CELDA
-     If ActiveCell.Value = L3 Then ActiveCell = TEXTO_CELDA
-     If ActiveCell.Value = L4 Then ActiveCell = TEXTO_CELDA
-   
-  End If
-  
-      ActiveCell.Offset(1, 0).Select
- Next i
 
-End Sub
 Sub UpdateProgressBar(ava)
 'Por.DAM
     CORRECCION_INVENTARIO.FProgress.Caption = Format(ava, "0%")
@@ -145,7 +125,7 @@ ActiveSheet.Range(Cells(5, 1), Cells(65536, 40)).Interior.ColorIndex = 0
    Range("H5").Select '-----------------"CORRIENTE DERRATEADA Y
   VALOR1 = 5
   VALOR2 = 350
-  L1 = ""
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
   L2 = "N/A"
   L3 = "NA"
   L4 = ""
@@ -2056,7 +2036,7 @@ For i = 5 To lastRow
         ActiveCell.Offset(0, 1).Select
     Next j
      L = L + 7
-                                '""   Atributo "NUMERO CONDENSADORAS" Valores fuera de rango (1-3)
+    '""   Atributo "NUMERO CONDENSADORAS" Valores fuera de rango (1-3)
       
        
       If IsError(ActiveCell) Then ActiveCell = "ND"
@@ -2167,7 +2147,6 @@ ActiveSheet.Range(Cells(5, 1), Cells(65536, 40)).Interior.ColorIndex = 0 'Unidad
 Range("E5").Select 'Atributo "CAPACIDAD NOMINAL" Valor "0" y "220" no permitidos
 
  For i = 5 To lastRow
-    
       
              If IsError(ActiveCell) Then ActiveCell = ""
                Select Case ActiveCell.Value
@@ -2178,8 +2157,6 @@ Range("E5").Select 'Atributo "CAPACIDAD NOMINAL" Valor "0" y "220" no permitidos
                Case ""
               ActiveCell.Interior.Color = QBColor(12)
            End Select
-      
-     
        
      ActiveCell.Offset(0, 17).Select
      If IsError(ActiveCell) Then ActiveCell = ""
@@ -2351,6 +2328,66 @@ REVISION_CELDA.Show
 
 End Sub
 
+Sub BUCLE1() '-------------------------------BUCLE1----MAYOR MENTE PARA CORREGIR VALORES-------------
+      
+For i = 5 To lastRow
+    If IsError(ActiveCell) Then ActiveCell = ""
+    If IsNumeric(ActiveCell.Value) Then
+      If (ActiveCell.Value) < VALOR1 Then ActiveCell = VALOR1
+      If (ActiveCell.Value) >= VALOR2 Then ActiveCell = VALOR2
+    End If
+ 
+    If MODIFICA = "SI" Then
+      If IsError(ActiveCell) Then ActiveCell = ""
+      VALIDACION
+     
+    End If
+   
+    ActiveCell.Offset(1, 0).Select
+  Next i
+
+End Sub
+Sub VALIDACION()
+
+   For X = LBound(vector) To UBound(vector)
+        If ActiveCell.Value = vector(X) Then
+            ActiveCell = TEXTO_CELDA
+            Exit For
+        End If
+        
+   Next
+End Sub
+Sub BUCLE2() '-------------------------------BUCLE2-------------
+      
+For i = 5 To lastRow
+    If IsError(ActiveCell) Then ActiveCell = ""
+    If IsNumeric(ActiveCell.Value) Then
+      If (ActiveCell.Value) < VALOR1 Then ActiveCell = VALOR1
+      If (ActiveCell.Value) >= VALOR2 Then ActiveCell = VALOR2
+    End If
+ 
+    If MODIFICA = "SI" Then
+      If IsError(ActiveCell) Then ActiveCell = ""
+      If IsDate(ActiveCell) Then
+          
+          Select Case ActiveCell.Value
+             Case Is = "1/10/2019"
+                ActiveCell = "1/0 AWG"
+             Case Is = "1/02/2000"
+                ActiveCell = "2/0 AWG"
+             Case Else
+                ActiveCell = "1/0 AWG"
+          End Select
+      End If
+         VALIDACION
+     
+    End If
+   
+    ActiveCell.Offset(1, 0).Select
+Next i
+
+End Sub
+
 Private Sub CommandButton3_Click() '**++++++++++++++++++++++++++++++++CORREGIR INFORME*++++++++++++++++++++++++++++++++++++++++++++++
 
 CORRECCION_INVENTARIO.LProgress.Width = 0
@@ -2370,53 +2407,47 @@ Sheets("PEE_").Select
  With ActiveSheet
     lastRow = .Cells(.Rows.Count, "C").End(xlUp).Row
   End With
-
+Application.ScreenUpdating = False
 ActiveSheet.Range(Cells(5, 1), Cells(65536, 40)).Interior.ColorIndex = 0
 
 'Atributo "ALTURA DE INSTALACIÓN" con celdas vacías fecha 12/04/2018
  Range("E5").Select
- 
-  VALOR1 = 3
-  VALOR2 = 3500
-   L1 = ""
-  L2 = "NA"
-  L3 = "NO VISIBLE"
-  L4 = "NO VERIFICABLE"
-  MODIFICA = "SI"
-  TEXTO_CELDA = "3"
+   
+    If IsError(ActiveCell) Then ActiveCell = ""
+    VALOR1 = 3
+    VALOR2 = 3500
+   
+    vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", 0)
+    MODIFICA = "SI"
+    TEXTO_CELDA = "3"
     BUCLE1
-        
- 
-'No es valido el valor de "0" y "NA" en "CARGA ACTUAL KVA". Independientemente de si está apagado o prendido se requiere conocer cuánto puede soportar FECHA=12/04/2018
+    'vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+    'L2 = "N/A"
+    'L3 = "NO VISIBLE"
+    'L4 = "NO VERIFICABLE"
+    'L5 = "NA"
+            
+ 'No es valido el valor de "0" y "NA" en "CARGA ACTUAL KVA". Independientemente de si está apagado o prendido se requiere conocer cuánto puede soportar FECHA=12/04/2018
  Range("F5").Select
   VALOR1 = 0
   VALOR2 = 500
-   L1 = ""
-  L2 = "NA"
-  L3 = "NO VISIBLE"
-  L4 = "NO VERIFICABLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ")
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
-    BUCLE1
+  BUCLE1
   '-----------------"CORRIENTE DERRATEADA Y CORRIENTE NOMINAL".
   Range("G5").Select
   VALOR1 = 5
   VALOR2 = 350
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VISIBLE"
-  L4 = "NO VERIFICABLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", 0)
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
-      BUCLE1
+  BUCLE1
       
    Range("H5").Select '-----------------"CORRIENTE DERRATEADA Y
     VALOR1 = 5
-  VALOR2 = 350
-   L1 = ""
-  L2 = "NA"
-  L3 = "NO VISIBLE"
-  L4 = "NO VERIFICABLE"
+    VALOR2 = 350
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ")
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
       BUCLE1
@@ -2425,10 +2456,8 @@ ActiveSheet.Range(Cells(5, 1), Cells(65536, 40)).Interior.ColorIndex = 0
 Range("J5").Select
   VALOR1 = 0.6
   VALOR2 = 0.9
-    L1 = ""
-  L2 = "NA"
-  L3 = "NO VISIBLE"
-  L4 = "NO VERIFICABLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0)
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
@@ -2437,10 +2466,8 @@ Range("J5").Select
   Range("K5").Select
   VALOR1 = 0.7
   VALOR2 = 0.9
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VISIBLE"
-  L4 = "NO VERIFICABLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0)
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0.7"
     BUCLE1
@@ -2449,12 +2476,10 @@ Range("J5").Select
 Range("N5").Select
   VALOR1 = 0
   VALOR2 = 1000000
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VISIBLE"
-  L4 = "NO VERIFICABLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0)
+  
   MODIFICA = "SI"
-  TEXTO_CELDA = "0"
+  TEXTO_CELDA = "ND"
     BUCLE1
 
 'SI LA MARCA  , MARCA PANEL CONTROL, MODELO  ESTAN EN N/A O N/V CAMBIAR POR NO VISIBLE
@@ -2462,21 +2487,17 @@ Range("N5").Select
 Range("Q5").Select
   VALOR1 = 0
   VALOR2 = 0
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VISIBLE"
-  L4 = "NO VERIFICABLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "GENERICO"
-    BUCLE1
+  BUCLE1
 
 'SI LA MARCA  , MARCA PANEL CONTROL, MODELO  ESTAN EN N/A O N/V CAMBIAR POR NO  VISIBLE 12/04/2018
 Range("R5").Select
 
-  L1 = ""
-  L2 = "0"
-  L3 = "N/A"
-  L4 = "NA"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
@@ -2488,10 +2509,9 @@ Range("R5").Select
 Range("U5").Select
   VALOR1 = 30
   VALOR2 = 100
-  L1 = "0"
-  L2 = "NA"
-  L3 = ""
-  L4 = "NO VERIFICABLE"
+  
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
@@ -2499,10 +2519,9 @@ Range("U5").Select
 Range("W5").Select
   VALOR1 = 0
   VALOR2 = 1
-  L1 = " "
-  L2 = "NA"
-  L3 = ""
-  L4 = "NO VISIBLE"
+  
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", "0", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -2513,10 +2532,9 @@ Range("Y5").Select
 
  VALOR1 = 0
  VALOR2 = 500
-   L1 = "NO VERIFICABLE"
-  L2 = "NA"
-  L3 = ""
-  L4 = "NO VISIBLE"
+   
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", "O", "o")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -2527,22 +2545,29 @@ Range("Y5").Select
 Range("AB5").Select
  VALOR1 = 0
  VALOR2 = 500
-  L1 = "NO VERIFICABLE"
-  L2 = "NA"
-  L3 = ""
-  L4 = "NO VISIBLE"
+ 
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O", 0)
+  
   MODIFICA = "SI"
-  TEXTO_CELDA = "0"
+  TEXTO_CELDA = "ND"
     BUCLE1
+'SERIAL: si no está publicado, se ingresa 123456789
+Range("AF5").Select
+  VALOR1 = 0
+  VALOR2 = 123456789
+  vector = Array("NO", "ND", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "", "N/V", 0, "o")
+  MODIFICA = "SI"
+  TEXTO_CELDA = "123456789"
+  BUCLE1
 
 ' Atributo "TENSIÓN NOMINAL" Valores en "0" no permitidos FECHA
 Range("AK5").Select
   VALOR1 = 100
   VALOR2 = 240
   L1 = "NO VERIFICABLE"
-  L2 = "NA"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
   L3 = ""
-  L4 = "NO VISIBLE"
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "100"
     BUCLE1
@@ -2552,9 +2577,9 @@ Range("AN5").Select
   VALOR1 = 0
   VALOR2 = 1
   L1 = " "
-  L2 = "NA"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
   L3 = ""
-  L4 = "NO VISIBLE"
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -2576,36 +2601,32 @@ ActiveSheet.Range(Cells(5, 1), Cells(65536, 22)).Interior.ColorIndex = 0
 Range("E5").Select
   VALOR1 = 40
   VALOR2 = 300
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
   MODIFICA = "SI"
-  TEXTO_CELDA = "0"
+  TEXTO_CELDA = "40"
     BUCLE1
 
 '"   Atributo "ANCHO TANQUE cm" Valores "0" Y "NA" no permitidos. Valores de 2.9 cm?
 Range("F5").Select
 VALOR1 = 40
 VALOR2 = 200
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+  
   MODIFICA = "SI"
-  TEXTO_CELDA = "0"
+  TEXTO_CELDA = "40"
     BUCLE1
 
 ' "   Atributo "AUTONOMIA ESTIMADA" Valores mayores a 200 h
 Range("G5").Select
 VALOR1 = 0
 VALOR2 = 300
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+  
   MODIFICA = "SI"
-  TEXTO_CELDA = "0"
+  TEXTO_CELDA = "ND"
     BUCLE1
 
 
@@ -2613,12 +2634,11 @@ VALOR2 = 300
 Range("H5").Select
   VALOR1 = 0
   VALOR2 = 1000
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+  
   MODIFICA = "SI"
-  TEXTO_CELDA = "0"
+  TEXTO_CELDA = "ND"
     BUCLE1
  
 '"   Atributo "CIECUNFERENCIA DEL TANQUE cm" Valores elevados ejemplo: 19100.
@@ -2626,12 +2646,10 @@ Range("I5").Select
 
   VALOR1 = 0
   VALOR2 = 150
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+  
   MODIFICA = "SI"
-  TEXTO_CELDA = "0"
+  TEXTO_CELDA = "ND"
     BUCLE1
     
 '"   Atributo "LARGO DEL TANQUE cm" Valores elevados ejemplo: 19100.
@@ -2639,10 +2657,8 @@ Range("N5").Select
 
   VALOR1 = 0
   VALOR2 = 300
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
@@ -2663,10 +2679,8 @@ ActiveSheet.Range(Cells(5, 1), Cells(65536, 22)).Interior.ColorIndex = 0
 Range("E5").Select
   VALOR1 = 0
   VALOR2 = 500
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
@@ -2675,10 +2689,8 @@ Range("E5").Select
 Range("F5").Select
   VALOR1 = 0
   VALOR2 = 50
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+ 
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
@@ -2688,11 +2700,9 @@ Range("F5").Select
 Range("G5").Select
 
   VALOR1 = 0
-  VALOR2 = 50
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  VALOR2 = 40
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
@@ -2701,10 +2711,8 @@ Range("O5").Select
 
   VALOR1 = 30
   VALOR2 = 100
-  L1 = ""
-  L2 = "N/A"
-  L3 = "NO VERIFICABLE"
-  L4 = "0"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
@@ -2714,10 +2722,8 @@ Range("P5").Select
 
   VALOR1 = 0
   VALOR2 = 800
-  L1 = ""
-  L2 = "N/A"
-  L3 = "NO VERIFICABLE"
-  L4 = "0"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
@@ -2728,29 +2734,33 @@ Range("Q5").Select
 
   VALOR1 = 0
   VALOR2 = 1000
-  L1 = ""
-  L2 = "N/A"
-  L3 = "NO VERIFICABLE"
-  L4 = "0"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
 '"   Atributo "TIPO DE COMBUSTIBLE" Valores en "NA"
 
-
+'SERIAL: si no está publicado, se ingresa 123456789
+Range("T5").Select
+  VALOR1 = 0
+  VALOR2 = 123456789
+  vector = Array("NO", "ND", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "", "N/V", 0, "o")
+  MODIFICA = "SI"
+  TEXTO_CELDA = "123456789"
+  BUCLE1
 
 '"   Atributo "TIPO MOTOR" valores que no coinciden (T:39201912, B, L)
 Range("X5").Select
 
   VALOR1 = 0
   VALOR2 = 0
-  L1 = ""
-  L2 = "N/A"
-  L3 = "NO VERIFICABLE"
-  L4 = "0"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
+    
 avance = 0.4
 UpdateProgressBar avance
 '**********************************************************************HOJA GENERADROR******************************************************
@@ -2762,23 +2772,22 @@ ActiveSheet.Range(Cells(5, 1), Cells(655, 22)).Interior.ColorIndex = 0
 
 '"   Atributo "MARCA" Valores en "0", "NA" y Vacías. Valores no permitidos
  Range("F5").Select
+   VALOR1 = 0
+   VALOR2 = 0
+   vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+  
+  MODIFICA = "SI"
+  TEXTO_CELDA = "ND"
+  BUCLE1
  
-For i = 5 To lastRow
-If IsError(ActiveCell) Then ActiveCell = ""
-If ActiveCell.Value = 0 Then ActiveCell = "ND"
-If ActiveCell.Value = "" Then ActiveCell = "ND"
-If ActiveCell.Value = "N/A" Then ActiveCell = "ND"
-ActiveCell.Offset(1, 0).Select
-Next i
-'"   Atributo "POTENCIA ACTIVA NOMINAL" Valores "0" y "NA" no permitidos
+
+'"   Atributo "MARCA DE TARJETA AVR " Valores "0" y "NA" no permitidos
 
  Range("G5").Select
   VALOR1 = 0
   VALOR2 = 0
-  L1 = ""
-  L2 = "N/A"
-  L3 = "NO VERIFICABLE"
-  L4 = "0"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
    BUCLE1
@@ -2789,43 +2798,44 @@ BUCLE1
 Range("I5").Select
 BUCLE1
 
-
- Range("J5").Select
-For i = 5 To lastRow
-If IsError(ActiveCell) Then ActiveCell = ""
-If ActiveCell.Value = 0 Then ActiveCell = "ND"
-If ActiveCell.Value = "" Then ActiveCell = "ND"
-If ActiveCell.Value = "N/A" Then ActiveCell = "ND"
-ActiveCell.Offset(1, 0).Select
-Next i
+Range("J5").Select
+VALOR1 = 0
+VALOR2 = 2000
+vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+MODIFICA = "SI"
+TEXTO_CELDA = "ND"
+BUCLE1
 
 '"   Atributo "POTENCA DERRATEADA NOMINAL" Valores en "0". ¿Valor de 1361 KVA Válido?  nota : la derrateada es menor a  la nominal
 
 
 '"   Atributo "POTENCIA NOMINAL KVA" Valores en "0" no permitidos
  Range("L5").Select
-For i = 5 To lastRow
-If IsError(ActiveCell) Then ActiveCell = ""
-If ActiveCell.Value = 0 Then ActiveCell = "ND"
-If ActiveCell.Value = "" Then ActiveCell = "ND"
-If ActiveCell.Value = "N/A" Then ActiveCell = "ND"
-ActiveCell.Offset(1, 0).Select
-Next i
+VALOR1 = 0
+VALOR2 = 1260
+vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+MODIFICA = "SI"
+TEXTO_CELDA = "ND"
+BUCLE1
+
+'SERIAL: si no está publicado, se ingresa 123456789
+Range("O5").Select
+  VALOR1 = 0
+  VALOR2 = 123456789
+  vector = Array("NO", "ND", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "", "N/V", 0, "o")
+  MODIFICA = "SI"
+  TEXTO_CELDA = "123456789"
+  BUCLE1
 
 '"   Atributo "TENSIÓN SALIDA ENTRE FASES" Valores en "0" y "NA" No permitidos
 
- Range("P5").Select
-For i = 5 To lastRow
-If IsError(ActiveCell) Then ActiveCell = ""
-If ActiveCell.Value = 0 Then ActiveCell = "ND"
-If ActiveCell.Value = "" Then ActiveCell = "ND"
-If ActiveCell.Value = "N/A" Then ActiveCell = "ND"
-ActiveCell.Offset(1, 0).Select
-Next i
-
-
-
-
+Range("P5").Select
+VALOR1 = 0
+VALOR2 = 229
+vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+MODIFICA = "SI"
+TEXTO_CELDA = "ND"
+BUCLE1
 
  
 avance = 0.5
@@ -2841,16 +2851,24 @@ ActiveSheet.Range(Cells(5, 1), Cells(65536, 22)).Interior.ColorIndex = 0
 '"   Atributo "MARCA BATERIA DE ARRANQIE" Valores "NA" No permitidos
 
  Range("G5").Select
-For i = 5 To lastRow
-If IsError(ActiveCell) Then ActiveCell = ""
-If ActiveCell.Value = 0 Then ActiveCell = "ND"
-If ActiveCell.Value = "" Then ActiveCell = "ND"
-If ActiveCell.Value = "N/D" Then ActiveCell = "ND"
-If ActiveCell.Value = "N/A" Then ActiveCell = "ND"
-If ActiveCell.Value = "NA" Then ActiveCell = "ND"
-ActiveCell.Offset(1, 0).Select
+ 
+  VALOR1 = 0
+  VALOR2 = 0
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+  
+  MODIFICA = "SI"
+  TEXTO_CELDA = "ND"
+  BUCLE1
+ '----------------------
+'"   Atributo MARCA CARGADOR MOTOR:  si no está publicado, se ingresa GENERICO
 
-Next i
+Range("I5").Select
+  VALOR1 = 0
+  VALOR2 = 10
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", "", 0, "O")
+  MODIFICA = "SI"
+  TEXTO_CELDA = "GENERICO"
+  BUCLE1
 
 '"   Atributo "TENSIÓN BATERIA DE ARRANQUE" Valores en "0" y menores a "9.5" V ESTARIA MAL
 
@@ -2858,21 +2876,17 @@ Next i
  
   VALOR1 = 11
   VALOR2 = 25
-  L1 = ""
-  L2 = "N/A"
-  L3 = "NO VERIFICABLE"
-  L4 = "0"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
-    BUCLE1
+  BUCLE1
 
 Range("Q5").Select
   VALOR1 = 11
   VALOR2 = 25
-   L1 = ""
-  L2 = "N/A"
-  L3 = "NO VERIFICABLE"
-  L4 = "0"
+   vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+ 
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
@@ -2881,10 +2895,8 @@ Range("Q5").Select
  Range("R5").Select
   VALOR1 = 11
   VALOR2 = 31
-  L1 = ""
-  L2 = "N/A"
-  L3 = "NO VERIFICABLE"
-  L4 = "0"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
@@ -2902,10 +2914,8 @@ ActiveSheet.Range(Cells(5, 1), Cells(65536, 27)).Interior.ColorIndex = 0
   Range("E5").Select
   VALOR1 = 0
   VALOR2 = 500
-   L1 = ""
-  L2 = "N/A"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -2913,13 +2923,11 @@ ActiveSheet.Range(Cells(5, 1), Cells(65536, 27)).Interior.ColorIndex = 0
   Range("H5").Select
   VALOR1 = 0
   VALOR2 = 0
-   L1 = ""
-  L2 = "N/A"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", "0", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
-    BUCLE1
+  BUCLE1
     
   Range("I5").Select
     BUCLE1
@@ -2934,21 +2942,28 @@ ActiveSheet.Range(Cells(5, 1), Cells(65536, 27)).Interior.ColorIndex = 0
 Range("N5").Select
   VALOR1 = 0
   VALOR2 = 300
-  L1 = ""
-  L2 = "N/A"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
+    
+    
+'SERIAL: si no está publicado, se ingresa 123456789
+Range("R5").Select
+  VALOR1 = 0
+  VALOR2 = 123456789
+  vector = Array("NO", "ND", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "", "N/V", 0, "o")
+  MODIFICA = "SI"
+  TEXTO_CELDA = "123456789"
+  BUCLE1
+  
 '"   Atributo "TENSIÓN NOMINAL FASE-FASE" y "TENSIÓN NOMINAL FASE- NEUTRO" Valores en "0" y "NA" No disponible
   Range("V5").Select
      VALOR1 = 100
      VALOR2 = 240
-  L1 = ""
-  L2 = "N/A"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -2956,13 +2971,13 @@ Range("N5").Select
  Range("W5").Select
      VALOR1 = 115
      VALOR2 = 125
-  L1 = ""
-  L2 = "N/A"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
+    
+
     
  avance = 0.7
 UpdateProgressBar avance
@@ -2976,10 +2991,8 @@ ActiveSheet.Range(Cells(5, 1), Cells(65536, 46)).Interior.ColorIndex = 0
  Range("E5").Select
      VALOR1 = 0
      VALOR2 = 30
-  L1 = ""
-  L2 = "N/A"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+ 
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -2988,10 +3001,8 @@ ActiveSheet.Range(Cells(5, 1), Cells(65536, 46)).Interior.ColorIndex = 0
  Range("N5").Select
   VALOR1 = 0
   VALOR2 = 30
-  L1 = ""
-  L2 = "N/A"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -2999,10 +3010,8 @@ ActiveSheet.Range(Cells(5, 1), Cells(65536, 46)).Interior.ColorIndex = 0
  Range("O5").Select
   VALOR1 = 0
   VALOR2 = 300
-  L1 = ""
-  L2 = "N/A"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3019,10 +3028,8 @@ Next i
 Range("Q5").Select   '"   Atributo "CORRIENTE ENTRADA R
   VALOR1 = 0
   VALOR2 = 200
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3035,10 +3042,8 @@ Range("S5").Select   '"   Atributo "CORRIENTE ENTRADA T
 Range("T5").Select
 VALOR1 = 0
 VALOR2 = 104
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3048,10 +3053,8 @@ Range("V5").Select
 
 VALOR1 = 0
   VALOR2 = 1
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3061,10 +3064,8 @@ Range("AC5").Select
 If IsError(ActiveCell) Then ActiveCell = ""
   VALOR1 = 0
   VALOR2 = 20
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3072,10 +3073,8 @@ If IsError(ActiveCell) Then ActiveCell = ""
 Range("AE5").Select
   VALOR1 = 0
   VALOR2 = 1
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3083,10 +3082,8 @@ Range("AE5").Select
 Range("AF5").Select
   VALOR1 = 0
   VALOR2 = 5
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3094,10 +3091,8 @@ Range("AF5").Select
 Range("AN5").Select
   VALOR1 = 24
   VALOR2 = 54
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3105,10 +3100,8 @@ Range("AN5").Select
 Range("AO5").Select
   VALOR1 = 100
   VALOR2 = 240
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3117,10 +3110,8 @@ Range("AO5").Select
 Range("AP5").Select
   VALOR1 = 47
   VALOR2 = 60
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3128,10 +3119,8 @@ Range("AP5").Select
 Range("AQ5").Select
   VALOR1 = 47
   VALOR2 = 60
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3140,10 +3129,8 @@ Range("AQ5").Select
 Range("AT5").Select
   VALOR1 = 0
   VALOR2 = 1
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3162,11 +3149,8 @@ ActiveSheet.Range(Cells(5, 1), Cells(65536, 57)).Interior.ColorIndex = 0
 Range("E5").Select
   VALOR1 = 20
   VALOR2 = 80
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
-  MODIFICA = "SI"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   TEXTO_CELDA = "ND"
     BUCLE1
 '"ANCHO CELDA",
@@ -3174,10 +3158,8 @@ Range("E5").Select
 Range("F5").Select
   VALOR1 = 10
   VALOR2 = 40
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", "0", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
@@ -3185,10 +3167,8 @@ Range("F5").Select
 Range("G5").Select
   VALOR1 = 0
   VALOR2 = 500
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3198,10 +3178,8 @@ Range("G5").Select
 Range("H5").Select
   VALOR1 = 0
   VALOR2 = 1000
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3209,10 +3187,8 @@ Range("H5").Select
 Range("K5").Select
   VALOR1 = 20
   VALOR2 = 80
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", "0", "O")
+ 
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
@@ -3220,20 +3196,16 @@ Range("K5").Select
 Range("N5").Select
   VALOR1 = 4
   VALOR2 = 24
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
 '   PESO
 Range("Q5").Select
   VALOR1 = 0
   VALOR2 = 500
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", "0", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
@@ -3241,10 +3213,8 @@ Range("Q5").Select
 Range("Y5").Select
   VALOR1 = 47
   VALOR2 = 55
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3252,10 +3222,8 @@ Range("Y5").Select
 Range("Z5").Select
   VALOR1 = 48
   VALOR2 = 60
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", "0", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
@@ -3263,10 +3231,8 @@ Range("Z5").Select
 Range("AA5").Select
   VALOR1 = 47
   VALOR2 = 55
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3275,10 +3241,8 @@ Range("AA5").Select
 Range("AB5").Select
   VALOR1 = 11
   VALOR2 = 14
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3295,10 +3259,8 @@ ActiveSheet.Range(Cells(5, 1), Cells(65536, 40)).Interior.ColorIndex = 0 'Unidad
 Range("E5").Select
   VALOR1 = 0
   VALOR2 = 60
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3307,10 +3269,8 @@ Range("E5").Select
 Range("F5").Select
   VALOR1 = 0
   VALOR2 = 50
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3325,10 +3285,8 @@ Range("H5").Select
 Range("J5").Select
   VALOR1 = 0.7
   VALOR2 = 1
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", "0", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
@@ -3339,10 +3297,8 @@ Range("K5").Select
 Range("Q5").Select
   VALOR1 = 0
   VALOR2 = 1
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3351,10 +3307,8 @@ Range("Q5").Select
 Range("R5").Select
   VALOR1 = 0
   VALOR2 = 80
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3364,10 +3318,8 @@ Range("R5").Select
 Range("S5").Select
   VALOR1 = 0
   VALOR2 = 100
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3376,10 +3328,8 @@ Range("S5").Select
 Range("Y5").Select
   VALOR1 = 12
   VALOR2 = 24
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3388,10 +3338,8 @@ Range("Y5").Select
 Range("Z5").Select
   VALOR1 = 100
   VALOR2 = 240
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3403,10 +3351,8 @@ Range("AA5").Select
 Range("AE5").Select
   VALOR1 = 0
   VALOR2 = 1
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3424,10 +3370,8 @@ ActiveSheet.Range(Cells(5, 1), Cells(65536, 67)).Interior.ColorIndex = 0
 Range("E5").Select 'CORRIENTE ENTREGADA R
   VALOR1 = 0
   VALOR2 = 50
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3439,10 +3383,8 @@ Range("G5").Select 'CORRIENTE ENTREGADA T
 Range("I5").Select
   VALOR1 = 0.7
   VALOR2 = 1
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
@@ -3450,10 +3392,8 @@ Range("I5").Select
 Range("P5").Select
   VALOR1 = 0
   VALOR2 = 1
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3461,10 +3401,8 @@ Range("P5").Select
 Range("Q5").Select
   VALOR1 = 0
   VALOR2 = 100
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3475,10 +3413,8 @@ Range("R5").Select
 Range("X5").Select
   VALOR1 = 48
   VALOR2 = 60
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3486,10 +3422,8 @@ Range("X5").Select
 Range("Y5").Select
   VALOR1 = 100
   VALOR2 = 240
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3497,17 +3431,30 @@ Range("Y5").Select
 Range("Z5").Select
   VALOR1 = 0
   VALOR2 = 1
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
 
 avance = 0.84
 UpdateProgressBar avance
+'********************************************************************************HOJA MEDICION ***************************************************
+Sheets("Medicion_").Select
+With ActiveSheet
+    lastRow = .Cells(.Rows.Count, "C").End(xlUp).Row
+End With
+Range("K5").Select
+  VALOR1 = 0
+  VALOR2 = 3
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+  
+  MODIFICA = "SI"
+  TEXTO_CELDA = "3"
+    BUCLE1
 
+avance = 0.85
+UpdateProgressBar avance
 '********************************************************************************HOJA TABLERO ELECTRICO ***************************************************
 Sheets("TabElectrico_").Select
  With ActiveSheet
@@ -3524,10 +3471,8 @@ ActiveSheet.Range(Cells(5, 1), Cells(65536, 157)).Interior.ColorIndex = 0
 Range("E5").Select
   VALOR1 = 1
   VALOR2 = 20
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+  
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3538,10 +3483,10 @@ Range("E5").Select
 Range("F5").Select
   VALOR1 = 1
   VALOR2 = 10
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3549,10 +3494,10 @@ Range("F5").Select
 Range("G5").Select
   VALOR1 = 0
   VALOR2 = 200
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3560,10 +3505,10 @@ Range("G5").Select
 Range("I5").Select
   VALOR1 = 0
   VALOR2 = 500
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", "0", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
@@ -3571,10 +3516,10 @@ Range("I5").Select
 Range("W5").Select
   VALOR1 = 100
   VALOR2 = 240
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3596,15 +3541,35 @@ ActiveSheet.Range(Cells(5, 1), Cells(65536, 127)).Interior.ColorIndex = 0
 '"   Atributo "NUMERO DE FASES" Valores "0" no permitidos
 'CORRIENTE ENTREGADA R
 
+'"   Atributo "CALIBRE CONDUTOR" Valores como fechas, indicar valores con números. Validar información
+Range("E5").Select
+  VALOR1 = 0
+  VALOR2 = 12
+  vector = Array("OK", "ALUMINIO", "AWG", "C", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", "", "O")
+      
+  MODIFICA = "SI"
+  TEXTO_CELDA = "8"
+  fecha = True
+    BUCLE2
+    
+'" CANTIDAD POSTES EN RED BT: se cuentan los postes BT que se encuentren dentro del predio (Telefónica)
+Range("F5").Select
+  VALOR1 = 1
+  VALOR2 = 3
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
+      
+  MODIFICA = "SI"
+  TEXTO_CELDA = "1"
+    BUCLE1
+
+'"   Atributo "CORRIENTE ENTREGADA R", "CORRIENTE ENTREGADA S", "CORRIENTE ENTREGADA T" valores en "0" y "NA" No permitidos
 Range("G5").Select
   VALOR1 = 0
   VALOR2 = 300
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+      
   MODIFICA = "SI"
-  TEXTO_CELDA = "0"
+  TEXTO_CELDA = "8"
     BUCLE1
 'CORRIENTE ENTREGADA S
 Range("H5").Select
@@ -3616,10 +3581,10 @@ Range("I5").Select
 Range("L5").Select
   VALOR1 = 0.7
   VALOR2 = 1
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", "0", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
@@ -3627,10 +3592,10 @@ Range("L5").Select
 Range("P5").Select
   VALOR1 = 0
   VALOR2 = 3
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3638,10 +3603,10 @@ Range("P5").Select
 Range("T5").Select
   VALOR1 = 100
   VALOR2 = 240
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3662,10 +3627,10 @@ ActiveSheet.Range(Cells(5, 1), Cells(536, 127)).Interior.ColorIndex = 0
 Range("S5").Select
   VALOR1 = 11.4
   VALOR2 = 34.5
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3687,20 +3652,20 @@ Range("E5").Select 'CORRIENTE CORTO CIRCUITO
 
   VALOR1 = 8
   VALOR2 = 85
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
 Range("F5").Select 'CORRIENTE NOMINAL
   VALOR1 = 6
   VALOR2 = 630
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3708,10 +3673,10 @@ Range("P5").Select 'TENSION NOMINAL
 
   VALOR1 = 100
   VALOR2 = 240
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3730,10 +3695,10 @@ Range("E5").Select
 
   VALOR1 = 1
   VALOR2 = 25
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3741,10 +3706,10 @@ Range("E5").Select
 Range("F5").Select
   VALOR1 = 6
   VALOR2 = 630
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3752,10 +3717,10 @@ Range("F5").Select
 Range("P5").Select
   VALOR1 = 1
   VALOR2 = 17.5
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", "0", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
@@ -3763,10 +3728,10 @@ Range("P5").Select
 Range("Q5").Select
   VALOR1 = 11.4
   VALOR2 = 34.5
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", "0", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
@@ -3789,20 +3754,20 @@ ActiveSheet.Range(Cells(5, 1), Cells(65536, 99)).Interior.ColorIndex = 0
 Range("E5").Select '"CANTIDAD PARARRAYOS
   VALOR1 = 1
   VALOR2 = 5
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
 Range("F5").Select 'CORRIENTE NOMINAL DESCARGA
   VALOR1 = 1
   VALOR2 = 25
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3810,10 +3775,10 @@ Range("F5").Select 'CORRIENTE NOMINAL DESCARGA
 Range("N5").Select 'TENSION MAXIMA DE OPERACION
   VALOR1 = 11.4
   VALOR2 = 34.5
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3838,20 +3803,20 @@ ActiveSheet.Range(Cells(5, 1), Cells(65536, 99)).Interior.ColorIndex = 0
 Range("G5").Select 'DIAMETRO CONDUCTOR
   VALOR1 = 25
   VALOR2 = 150
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
     Range("H5").Select 'DIAMETRO CONDUCTOR
   VALOR1 = 0
   VALOR2 = 150
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", "0", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
@@ -3859,10 +3824,10 @@ Range("G5").Select 'DIAMETRO CONDUCTOR
 Range("O5").Select 'MEDIDA PUESTA A TIERRA
   VALOR1 = 0.1
   VALOR2 = 15
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3886,10 +3851,10 @@ ActiveSheet.Range(Cells(5, 1), Cells(65536, 99)).Interior.ColorIndex = 0
 Range("E5").Select 'CARGA ACTUAL
   VALOR1 = 0.01
   VALOR2 = 300
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3897,10 +3862,10 @@ Range("E5").Select 'CARGA ACTUAL
 Range("N5").Select 'OCUPACION
   VALOR1 = 0
   VALOR2 = 1
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3908,10 +3873,10 @@ Range("N5").Select 'OCUPACION
 Range("O5").Select 'POTENCIA NOMINAL
   VALOR1 = 0.01
   VALOR2 = 300
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3919,30 +3884,30 @@ Range("O5").Select 'POTENCIA NOMINAL
 Range("U5").Select 'TENSION PRIMARIO
   VALOR1 = 11.4
   VALOR2 = 34.5
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
 Range("V5").Select 'TENSION SECUNDARIO
   VALOR1 = 100
   VALOR2 = 240
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
 Range("Z5").Select 'TENSION SECUNDARIO
   VALOR1 = 0
   VALOR2 = 1
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+   
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
@@ -3974,36 +3939,48 @@ ActiveSheet.Range(Cells(5, 1), Cells(65536, 99)).Interior.ColorIndex = 0
 Range("E5").Select ' CAPACIDAD TERMICA
   VALOR1 = 0.1
   VALOR2 = 40
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
 
 Range("F5").Select 'CARGA ACTUAL ESTIMADA
- BUCLE1
+    BUCLE1
 Range("I5").Select 'FACTOR EFICIENCIA
   VALOR1 = 0.1
   VALOR2 = 3
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", 0, "O")
   MODIFICA = "SI"
   TEXTO_CELDA = "ND"
     BUCLE1
     
-Range("P5").Select 'NUMERO DE COMPRESORES
+Range("K5").Select '"MARCA" valores en "0" no permitidos
+  VALOR1 = 0
+  VALOR2 = 10
+  vector = Array("", "NO VISIBLE", "-", " ", 0, 10, "0", "10", 1, 6)
+  MODIFICA = "SI"
+  TEXTO_CELDA = "GENERICO"
+    BUCLE1
+    
+Range("M5").Select '"MODELO" valores en "0" no permitidos
+    BUCLE1
+    
+'"   Atributo "MARCA SISTEMA DE GESTIÓN" Valores "NA" y "SI" No permitidos
+Range("L5").Select
+  VALOR1 = 0
+  VALOR2 = 10
+  vector = Array("N/A", "NA", "NO VISIBLE", "-", "", 0, 10, "0", "10", 1, 6)
+  MODIFICA = "SI"
+  TEXTO_CELDA = "NO VERIFICABLE"
+    BUCLE1
+    
+Range("P5").Select '"Atributo "NÚMERO DE COMPRESORES" y "NÚMEROD E SALONES" Valores "0", "NA" y celdas vacías no permitidas
+
   VALOR1 = 1
   VALOR2 = 4
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "VENTANA", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", "MOVIL", 0, "O")
   MODIFICA = "SI"
-  TEXTO_CELDA = "0"
+  TEXTO_CELDA = "1"
     BUCLE1
 
 Range("Q5").Select 'NUMERO DE SALONES
@@ -4018,35 +3995,43 @@ Range("S5").Select 'NUMERO_CONDENSADORAS
 Range("U5").Select ' OCUPACION
   VALOR1 = 0
   VALOR2 = 1
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+      
+   
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
 
-Range("V5").Select 'POTENCIA CONSUMIDA
+ Range("V5").Select 'POTENCIA CONSUMIDA
   VALOR1 = 0.001
   VALOR2 = 10
-  L1 = ""
-  L2 = "NA"
-  L3 = "NO VERIFICABLE"
-  L4 = "NO VISIBLE"
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", " ", ".", "O")
+   
+      
   MODIFICA = "SI"
   TEXTO_CELDA = "0"
     BUCLE1
 
-Range("W5").Select '
- BUCLE1
-
-
-
-
+ Range("W5").Select '
+  BUCLE1
+  
+Range("AB5").Select 'SERIAL
+  VALOR1 = 0
+  VALOR2 = 123456789
+  vector = Array("NO", "ND", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "", "N/V", 0, "o")
+  MODIFICA = "SI"
+  TEXTO_CELDA = "123456789"
+  BUCLE1
+  
+Range("AJ5").Select 'TEMP_SALON_REFRIGERADO
+  VALOR1 = 0
+  VALOR2 = 50
+  vector = Array("", "N/A", "NO VISIBLE", "NO VERIFICABLE", "NA", "-", "50", 0, "o")
+  MODIFICA = "SI"
+  TEXTO_CELDA = "26"
+  BUCLE1
 avance = 0.99
 UpdateProgressBar avance
-
-
 
 '********************************************************************************HOJA PROTECCIONES ***************************************************
 Sheets("Protecciones_").Select
@@ -4216,9 +4201,8 @@ MsgBox "FIN  DE PROCESO : SE CAMBIARON LOS ERRORES  MAS COMUNES "
 CORRECCION_INVENTARIO.Hide
 'CIERRA MACRO AL FINALIZAR
 
-
+Application.ScreenUpdating = True
 
 End Sub
-
 
 
