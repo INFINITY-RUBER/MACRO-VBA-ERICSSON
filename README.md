@@ -1,12 +1,14 @@
 # Codigo para recordar
 <div align="center">
-    <h2> MACRO ERICSSON PREVENTIVOS </h2>
-    <img src="img/mpa.png">    
-    <h2> MACRO ERICSSON CORRECION INVENTARIOS </h2>
-    <img src="img/inventarios.png">    
+   <h2> MACRO ERICSSON PREVENTIVOS </h2>
+   <img src="img/mpa.png">  
     
+   <h2> MACRO ERICSSON CORRECION INVENTARIOS </h2>
+   <img src="img/inventarios.png">    
+   
+  <small><p>Sistema de Control Local</p></small>  
   <img src="img/arreglo.png">
-  <small><p>Sistema de Control Local</p></small>
+  
 </div>
 
 ## ARREGLOS O VECTORES
